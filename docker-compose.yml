@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  # ── AI 聊天网页 ──
+  lobechat:
+    image: lobehub/lobe-chat:latest
+    container_name: lobechat
+    restart: unless-stopped
+    ports:
+      - "3210:3210"
+    environment:
+      # 对接 New-API
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_PROXY_URL=http://new-api:3000/v1
+      # 访问密码（留空则无需密码）
+      - ACCESS_CODE=${ACCESS_CODE}
+    depends_on:
+      - new-api
+
+  # ── API 网关（统一管理多模型） ──
+  new-api:
+    image: calciumion/new-api:latest
+    container_name: new-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - TZ=Asia/Shanghai
+      - GENERATE_DEFAULT_TOKEN=true
+    volumes:
+      - new-api-data:/data
+
+  # ── Nginx 反向代理（统一入口） ──
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - lobechat
+      - new-api
+
+volumes:
+  new-api-data:
