@@ -61,19 +61,18 @@ docker compose ps
 
 ### 配置 HTTPS
 
-#### 方式一：Ngrok（免费，无需域名）
+安装 Cloudflare Tunnel，一行命令即可获得免费 HTTPS 地址：
 
 ```bash
-ngrok http 80
-```
+# 安装
+curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+dpkg -i cloudflared.deb
 
-得到 `https://xxxxx.ngrok-free.app`，用户通过此地址访问。
-
-#### 方式二：Cloudflare Tunnel（更稳定）
-
-```bash
+# 启动（会输出一个 https://xxxxx.trycloudflare.com 地址）
 cloudflared tunnel --url http://localhost:80
 ```
+
+把显示的 `https://xxxxx.trycloudflare.com` 地址发给用户即可。
 
 ## 项目结构
 
